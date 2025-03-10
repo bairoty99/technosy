@@ -1,0 +1,13 @@
+telethon
+yt-dlp
+instaloader
+ffmpeg-python
+aiofiles
+aiosqlite
+python-slugify
+requests
+python-telegram
+google-auth-oauthlib
+google-auth-httplib2
+google-api-python-client
+validators
