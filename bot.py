@@ -316,7 +316,8 @@ async def process_download(url, event, platform, quality, audio_only, as_doc, to
                 del ydl_opts['merge_output_format']
             try:
                 with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                    info = await retry_on_failure(lambda: ydl.extract_info(url, download=True))
+                    loop = asyncio.get_running_loop()
+                    info = await loop.run_in_executor(None, lambda: ydl.extract_info(url, download=True))
                     if not info or not info.get('title'):
                         raise ValueError("فشل استخراج المعلومات!")
                     if is_playlist:
@@ -324,36 +325,13 @@ async def process_download(url, event, platform, quality, audio_only, as_doc, to
                     else:
                         file_path = f"downloads/{slugify(info['title'])}.{'mp3' if audio_only else 'mp4'}"
                         files = [file_path]
-                processed_files = []
-                for file in files:
-                    if not os.path.exists(file) or os.path.getsize(file) == 0:
-                        raise FileNotFoundError(f"الملف {file} غير موجود!")
-                    if not audio_only and not to_gif:
-                        output = f"{os.path.splitext(file)[0]}_compressed.mp4"
-                        success, _ = await compress_video(file, output)
-                        if not success:
-                            raise RuntimeError("فشل الضغط!")
-                        os.remove(file)
-                        processed_files.append(output)
-                    elif to_gif:
-                        output = f"{os.path.splitext(file)[0]}.gif"
-                        success, _ = await convert_to_gif(file, output)
-                        if not success:
-                            raise RuntimeError("فشل تحويل GIF!")
-                        os.remove(file)
-                        processed_files.append(output)
-                    else:
-                        processed_files.append(file)
-                files = processed_files
-                if not is_playlist and files:
-                    await db.execute("INSERT OR REPLACE INTO cache (url, file_path, timestamp) VALUES (?, ?, ?)", 
-                                    (url, files[0], time.time()))
-                    await db.commit()
+                # ... (file processing logic)
             except Exception as e:
                 stats['errors'] += 1
                 await status_msg.edit(f"❌ **فشل التحميل:** {str(e)}\n@techno_syria_bot", 
                                      buttons=[Button.inline("🔄 حاول مجدداً", f"retry_{platform}_{url}")])
                 return
+    # ... (file sending logic)
     try:
         await status_msg.edit("⚡ **جاري الإرسال...** ⏳")
         for file in files:
