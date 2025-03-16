@@ -316,7 +316,8 @@ async def process_download(url, event, platform, quality, audio_only, as_doc, to
                 del ydl_opts['merge_output_format']
             try:
                 with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                    info = await retry_on_failure(lambda: ydl.extract_info(url, download=True))
+                    loop = asyncio.get_running_loop()
+                    info = await loop.run_in_executor(None, lambda: ydl.extract_info(url, download=True))
                     if not info or not info.get('title'):
                         raise ValueError("فشل استخراج المعلومات!")
                     if is_playlist:
