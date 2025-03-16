@@ -34,7 +34,7 @@ api_hash = os.getenv('API_HASH')
 bot_token = os.getenv('BOT_TOKEN')
 DEVELOPER_ID = int(os.getenv('DEVELOPER_ID', '0'))
 GOOGLE_CREDS = os.getenv('GOOGLE_CREDS_JSON')
-COOKIES_PATH = '/root/grokthunder-bot/youtube_cookies.txt'
+COOKIES_PATH = '/root/technosy/youtube_cookies.txt'
 
 # التحقق من الإعدادات الأساسية
 if not all([api_id, api_hash, bot_token]):
